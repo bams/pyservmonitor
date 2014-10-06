@@ -173,7 +173,7 @@ class ui():
           self.southPanel.set_focus(pos-1)
 
       if input is 'h' or input is '?': # help
-        content[:] = self.get_south_content('')
+        self.content[:] = self.get_south_content('')
 
       if input is 'tab':
         inv_focus()
