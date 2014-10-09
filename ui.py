@@ -37,15 +37,29 @@ class ui():
     Entry('   q:       quit'),
   ]
 
-  up_entries = None
-  script_match = None
+  def __init__(self, up_entries, script_match):
+    self.up_entries = up_entries
+    self.script_match = script_match
 
-  northPanel = None
-  southPanel = None
-  view = None
-  content = None
-  cont = None
-  north_entries = None
+    # the north panel
+    self.north_entries = urwid.SimpleListWalker([urwid.AttrMap(w, None, 'body') for w in up_entries])
+    self.northPanel = urwid.ListBox(self.north_entries)
+
+    # the south panel
+    self.content = urwid.SimpleListWalker(self.get_south_content(''))
+    self.southPanel = urwid.ListBox(self.content)
+
+    # the global content
+    # LineBox add a surrounding box around the widget
+    self.cont = urwid.Pile([('fixed', 10, urwid.LineBox(self.northPanel)), urwid.LineBox(self.southPanel),])
+    # create the header
+    header = urwid.AttrMap(urwid.Text(self.header_txt), 'head')
+    footer = urwid.AttrMap(urwid.Text(self.get_date() + self.footer_txt), 'head')
+    # create the global frame
+    self.view = urwid.Frame(self.cont, header=header, footer=footer)
+    # start the main loop
+    loop = urwid.MainLoop(self.view, self.palette, unhandled_input=self.keystroke, handle_mouse=False)
+    loop.run()
 
   def get_date(self):
     return datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -73,30 +87,6 @@ class ui():
         content = [urwid.AttrMap(Entry(w), None, 'south') for w in text]
     return content
 
-  def __init__(self, up_entries, script_match):
-
-    self.up_entries = up_entries
-    self.script_match = script_match
-
-    # the north panel
-    self.north_entries = urwid.SimpleListWalker([urwid.AttrMap(w, None, 'body') for w in up_entries])
-    self.northPanel = urwid.ListBox(self.north_entries)
-
-    # the south panel
-    self.content = urwid.SimpleListWalker(self.get_south_content(''))
-    self.southPanel = urwid.ListBox(self.content)
-
-    # the global content
-    # LineBox add a surrounding box around the widget
-    self.cont = urwid.Pile([('fixed', 10, urwid.LineBox(self.northPanel)), urwid.LineBox(self.southPanel),])
-    # create the header
-    header = urwid.AttrMap(urwid.Text(self.header_txt), 'head')
-    footer = urwid.AttrMap(urwid.Text(self.get_date() + self.footer_txt), 'head')
-    # create the global frame
-    self.view = urwid.Frame(self.cont, header=header, footer=footer)
-    # start the main loop
-    loop = urwid.MainLoop(self.view, self.palette, unhandled_input=self.keystroke, handle_mouse=False)
-    loop.run()
 
   def set_header(self, txt):
     # update header

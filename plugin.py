@@ -5,10 +5,6 @@
 #   - cmd to execute
 
 class plugin():
-  name = 'unknown'
-  menu_txt = 'unknown'
-  cmd = ''
- 
   ''' 
   @name: the plugin name
   @menu_txt: what will be displayed in the menu

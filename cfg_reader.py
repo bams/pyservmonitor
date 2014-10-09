@@ -8,12 +8,11 @@ import csv
 from plugin import plugin
 
 class cfg_reader():
-  _path = None
-  _plugins = []
-  _DEBUG = False
+  DEBUG = False
 
   def __init__(self, path):
     self._path = path
+    self._plugins = []
     self._parse()
 
   def _parse(self):
@@ -23,14 +22,14 @@ class cfg_reader():
         self._parse_line(row)
 
   def _parse_line(self, fields):
-    if self._DEBUG:
+    if self.DEBUG:
       print 'parsing %s ...' % (fields)
     if len(fields) != 3:
-      if self._DEBUG:
+      if self.DEBUG:
         print 'line %s too few elemtns' % (fields)
       return
     if fields[0][0] == '#':
-      if self._DEBUG:
+      if self.DEBUG:
         print 'line %s is a comment' % (fields)
       return
 
@@ -38,7 +37,7 @@ class cfg_reader():
     entry = fields[1]
     cmd = fields[2]
 
-    if self._DEBUG:
+    if self.DEBUG:
       print 'adding: %s' % (fields)
     self._plugins.append(plugin(name, entry, cmd))
 
