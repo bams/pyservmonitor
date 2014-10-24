@@ -36,14 +36,14 @@ cfgr = cfg_reader(cfg)
 plugins = cfgr.get_plugins()
 err('%i entries parsed from config \"%s\"' % (len(plugins), cfg))
 
-# Let's construct the lists for the ui
-# - up_entries: the menu entry
-# - script_match: the commands
-up_entries = []
-script_match = {}
-for i,p in enumerate(plugins):
-  up_entries.append(Entry('%i) %s' % (i+1, p.menu_txt)))
-  script_match[i] = p.cmd
+# let's construct a tree
+ps = {}
+for p in plugins:
+  if p.name in ps:
+    ps[p.name].append(p)
+  else:
+    ps[p.name] = [p]
+entries = ps
 
-ui(up_entries, script_match)
+ui(entries, [])
 

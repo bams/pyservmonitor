@@ -6,12 +6,87 @@ import urwid # python-urwid
 import subprocess
 import getpass
 import datetime
+import sys
 
 class Entry(urwid.Text):
   def selectable(self):
       return True
   def keypress(self,  size,  key):
       return key
+
+# each tree has nodes. Each node 
+# contains a widget that's used
+# for displaying the content of the entry.
+# The ParentNode's task is to maintain
+# order in the nodes in the tree
+
+def err(string):
+  sys.stderr.write('%s\n' % (string))
+
+# the different widgets in the tree view
+class TextTreeWidget(urwid.TreeWidget):
+  # is called by parent node
+  # to get the content
+  # get_node().get_value() returns the tuple
+  def get_display_text(self):
+    err('get_display_text')
+    err(str(self.get_node().get_value()))
+    err(type(self.get_node().get_value()))
+    err(len(self.get_node().get_value()))
+
+    v = self.get_node().get_value()
+    if type(v) == dict:
+      err('item: ' + v.items()[0][0])
+      return v.items()[0][0]
+    else:
+      return v[0]
+
+class CmdTreeWidget(urwid.TreeWidget):
+  def get_display_text(self):
+    return 'a cmd widget'
+
+class EmptyTreeWidget(urwid.TreeWidget):
+  def get_display_text(self):
+    return 'an empty widget'
+
+# the different nodes in the tree view
+class TextNode(urwid.TreeNode):
+  def load_widget(self):
+    return TextTreeWidget(self)
+
+class CmdNode(urwid.TreeNode):
+  def load_widget(self):
+    return CmdTreeWidget(self)
+
+class EmptyNode(urwid.TreeNode):
+  def load_widget(self):
+    return EmptyTreeWidget(self)
+
+# the parent node
+class EntryNode(urwid.ParentNode):
+
+  def load_widget(self):
+    return TextTreeWidget(self)
+
+  def load_child_keys(self):
+    err('load_child_keys: ')
+    err(self.get_value())
+    err('keys:')
+    err(range(len(self.get_value().items())))
+    return range(len(self.get_value().items()))
+
+  def load_child_node(self, key):
+    err('load_child_node: ')
+    err(self.get_value())
+    err('key: %i' % (key))
+    if key == None:
+      # child
+      return EmptyNode(None)
+    else:
+      # parent
+      err('load_child_node2:')
+      err(str(self.get_value().items()[key]))
+      return TextNode(self.get_value().items()[key])
 
 class ui():
 
@@ -35,6 +110,8 @@ class ui():
     Entry('   j/k:     navigate'),
     Entry('   h:       display this help'),
     Entry('   q:       quit'),
+    Entry('   +:       expand'),
+    Entry('   -:       fold'),
   ]
 
   def __init__(self, up_entries, script_match):
@@ -42,8 +119,7 @@ class ui():
     self.script_match = script_match
 
     # the north panel
-    self.north_entries = urwid.SimpleListWalker([urwid.AttrMap(w, None, 'body') for w in up_entries])
-    self.northPanel = urwid.ListBox(self.north_entries)
+    self.northPanel = urwid.TreeListBox(urwid.TreeWalker(EntryNode(up_entries)))
 
     # the south panel
     self.content = urwid.SimpleListWalker(self.get_south_content(''))
@@ -87,7 +163,6 @@ class ui():
         content = [urwid.AttrMap(Entry(w), None, 'south') for w in text]
     return content
 
-
   def set_header(self, txt):
     # update header
     self.view.set_header(urwid.AttrWrap(urwid.Text(
@@ -103,7 +178,8 @@ class ui():
     cmd = self.script_match.get(pos)
     if cmd == '':
       return
-    self.set_header(' - item %s' % (str(self.up_entries[pos].get_text()[0])))
+    # TODO
+    #self.set_header(' - item %s' % (str(self.up_entries[pos].get_text()[0])))
     self.set_footer('\"%s\"' % (cmd))
     # update south pane
     self.content[:] = self.get_south_content(cmd)
