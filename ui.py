@@ -124,9 +124,9 @@ class ui():
   def inv_focus(self):
     up = self.get_focus_up()
     if up:
-      set_focus(False)
+      self.set_focus(False)
     else:
-      set_focus(True)
+      self.set_focus(True)
 
   def keystroke(self, input):
       if input in ('q', 'Q'):
@@ -146,7 +146,7 @@ class ui():
           self.northPanel.set_focus(pos+1)
         else:
           focus, pos = self.southPanel.get_focus()
-          if pos >= len(content)-1:
+          if pos >= len(self.content)-1:
             return
           self.southPanel.set_focus(pos+1)
 
@@ -166,5 +166,5 @@ class ui():
         self.content[:] = self.get_south_content('')
 
       if input is 'tab':
-        inv_focus()
+        self.inv_focus()
 
