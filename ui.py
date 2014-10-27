@@ -157,6 +157,8 @@ class ui():
     Entry('   tab:     change focus up/down'),
     Entry('   +:       expand'),
     Entry('   -:       fold'),
+    Entry('   right:   open children'),
+    Entry('   left:    get parent'),
   ]
 
   def __init__(self, entries):
