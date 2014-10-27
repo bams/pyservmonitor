@@ -29,10 +29,10 @@ class TextTreeWidget(urwid.TreeWidget):
   # to get the content
   # get_node().get_value() returns the tuple
   def get_display_text(self):
-    err('get_display_text')
+    err('\n>>> get_display_text')
     err(str(self.get_node().get_value()))
     err(type(self.get_node().get_value()))
-    err(len(self.get_node().get_value()))
+    err('nb entry: %i' % (len(self.get_node().get_value())))
 
     v = self.get_node().get_value()
     if type(v) == dict:
@@ -69,14 +69,14 @@ class EntryNode(urwid.ParentNode):
     return TextTreeWidget(self)
 
   def load_child_keys(self):
-    err('load_child_keys: ')
+    err('\n>>> load_child_keys: ')
     err(self.get_value())
     err('keys:')
     err(range(len(self.get_value().items())))
     return range(len(self.get_value().items()))
 
   def load_child_node(self, key):
-    err('load_child_node: ')
+    err('\n>>> load_child_node: ')
     err(self.get_value())
     err('key: %i' % (key))
     if key == None:
