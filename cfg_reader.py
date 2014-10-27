@@ -17,7 +17,8 @@ class cfg_reader():
 
   def _parse(self):
     with open(self._path, 'r') as f:
-      reader = csv.reader(f, delimiter=':', quoting=csv.QUOTE_MINIMAL, quotechar='\'', escapechar='\\')
+      reader = csv.reader(f, delimiter=':',
+        quoting=csv.QUOTE_MINIMAL, quotechar='\'', escapechar='\\')
       for row in reader:
         self._parse_line(row)
 
