@@ -5,7 +5,7 @@
 # deps:
 #   urwid (python-urwid in debian)
 
-import plugin
+from plugin import *
 from cfg_reader import cfg_reader
 import argparse
 from ui import *
@@ -37,13 +37,31 @@ plugins = cfgr.get_plugins()
 err('%i entries parsed from config \"%s\"' % (len(plugins), cfg))
 
 # let's construct a tree
-ps = {}
+# {'<EntryName>': [name: 'name', menu: 'menu', cmd: 'cmd'], ...}
+# 
+# {children: []}
+#retval = {"name":"parent","children":[]}
+#for i in range(3):
+#    retval['children'].append({"name":"child " + str(i)})
+#    retval['children'][i]['children']=[]
+#    for j in range(2):
+#        retval['children'][i]['children'].append({"name":"grandchild " +
+#                                                  str(i) + "." + str(j)})
+#entries = retval
+
+
+#ps = {} # name: XXX, children: []
+#ps = {'name': 'Commands', 'children': [], 'data': None}
+thetree = MyTree()
 for p in plugins:
-  if p.name in ps:
-    ps[p.name].append(p)
-  else:
-    ps[p.name] = [p]
-entries = ps
+  print 'adding %s' % (p)
+  thetree.add(p.name, p)
+  print thetree
+  print '---------------------------'
+
+print thetree
+entries = thetree
+#print entries
 
 ui(entries, [])
 

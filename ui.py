@@ -7,6 +7,7 @@ import subprocess
 import getpass
 import datetime
 import sys
+from plugin import *
 
 class Entry(urwid.Text):
   def selectable(self):
@@ -25,42 +26,42 @@ def err(string):
 
 # the different widgets in the tree view
 class TextTreeWidget(urwid.TreeWidget):
+  def __init__(self, node):
+    self.__super.__init__(node)
+
+  def selectable(self):
+    return True
+
+  def keypress(self, size, key):
+    key = self.__super.keypress(size, key)
+    return key
+
   # is called by parent node
   # to get the content
   # get_node().get_value() returns the tuple
   def get_display_text(self):
-    err('\n>>> get_display_text')
-    err(str(self.get_node().get_value()))
-    err(type(self.get_node().get_value()))
-    err('nb entry: %i' % (len(self.get_node().get_value())))
-
-    v = self.get_node().get_value()
-    if type(v) == dict:
-      err('item: ' + v.items()[0][0])
-      return v.items()[0][0]
+    if self.get_node().get_value().is_title:
+      return self.get_node().get_value().name
     else:
-      return v[0]
+      return self.get_node().get_value().data.menu_txt
 
-class CmdTreeWidget(urwid.TreeWidget):
+class TitleTreeWidget(urwid.TreeWidget):
+  def selectable(self):
+    return True
+  def keypress(self, size, key):
+    return key
   def get_display_text(self):
-    return 'a cmd widget'
-
-class EmptyTreeWidget(urwid.TreeWidget):
-  def get_display_text(self):
-    return 'an empty widget'
+    return self.get_node().get_value().name
 
 # the different nodes in the tree view
 class TextNode(urwid.TreeNode):
   def load_widget(self):
     return TextTreeWidget(self)
 
-class CmdNode(urwid.TreeNode):
+class TitleNode(urwid.TreeNode):
   def load_widget(self):
-    return CmdTreeWidget(self)
-
-class EmptyNode(urwid.TreeNode):
-  def load_widget(self):
-    return EmptyTreeWidget(self)
+    return TitleTreeWidget(self)
+  
 
 # the parent node
 class EntryNode(urwid.ParentNode):
@@ -69,24 +70,15 @@ class EntryNode(urwid.ParentNode):
     return TextTreeWidget(self)
 
   def load_child_keys(self):
-    err('\n>>> load_child_keys: ')
-    err(self.get_value())
-    err('keys:')
-    err(range(len(self.get_value().items())))
-    return range(len(self.get_value().items()))
+    return range(len(self.get_value().children))
 
   def load_child_node(self, key):
-    err('\n>>> load_child_node: ')
-    err(self.get_value())
-    err('key: %i' % (key))
-    if key == None:
-      # child
-      return EmptyNode(None)
+    nchild = self.get_value().children[key]
+    ndepth = self.get_value().depth + 1
+    if self.get_value().is_title():
+      return EntryNode(nchild, parent=self, key=key, depth=ndepth)
     else:
-      # parent
-      err('load_child_node2:')
-      err(str(self.get_value().items()[key]))
-      return TextNode(self.get_value().items()[key])
+      return EntryNode(nchild, parent=self, key=key, depth=ndepth)
 
 class ui():
 
@@ -120,6 +112,7 @@ class ui():
 
     # the north panel
     self.northPanel = urwid.TreeListBox(urwid.TreeWalker(EntryNode(up_entries)))
+    self.northPanel.offset_rows = 1
 
     # the south panel
     self.content = urwid.SimpleListWalker(self.get_south_content(''))
@@ -174,15 +167,16 @@ class ui():
         self.get_date() + self.footer_txt + txt), 'head'))
 
   def update_display(self):
-    focus, pos = self.northPanel.get_focus()
-    cmd = self.script_match.get(pos)
-    if cmd == '':
-      return
-    # TODO
-    #self.set_header(' - item %s' % (str(self.up_entries[pos].get_text()[0])))
-    self.set_footer('\"%s\"' % (cmd))
-    # update south pane
-    self.content[:] = self.get_south_content(cmd)
+    widget, node= self.northPanel.get_focus()
+    if not widget.get_node().get_value().is_title():
+      cmd = widget.get_node().get_value().data.cmd
+      name = widget.get_node().get_value().data.name
+      self.set_footer('\"%s\"' % (cmd))
+      self.set_header(' - item %s' % (name))
+      self.content[:] = self.get_south_content(cmd)
+    else:
+      self.set_footer('')
+      
 
   # return True if focus is on north widget
   def get_focus_up(self):
@@ -207,40 +201,23 @@ class ui():
   def keystroke(self, input):
       if input in ('q', 'Q'):
           raise urwid.ExitMainLoop()
-
-      if input is 'enter' or input is ' ':
+      elif input is 'enter' or input is ' ':
         self.update_display()
-
-      if input is 'r':
+      elif input is 'r':
         self.update_display()
-
-      if input is 'j':
-        if self.get_focus_up():
-          focus, pos = self.northPanel.get_focus()
-          if pos >= len(self.north_entries)-1:
-            return
-          self.northPanel.set_focus(pos+1)
-        else:
-          focus, pos = self.southPanel.get_focus()
-          if pos >= len(content)-1:
-            return
-          self.southPanel.set_focus(pos+1)
-
-      if input is 'k':
-        if self.get_focus_up():
-          focus, pos = self.northPanel.get_focus()
-          if pos == 0:
-            return
-          self.northPanel.set_focus(pos-1)
-        else:
-          focus, pos = self.southPanel.get_focus()
-          if pos == 0:
-            return
-          self.southPanel.set_focus(pos-1)
-
-      if input is 'h' or input is '?': # help
+      #elif input is 'j':
+      #  if self.get_focus_up():
+      #    focus, pos = self.northPanel.get_focus()
+      #  else:
+      #    focus, pos = self.southPanel.get_focus()
+      #    self.southPanel.set_focus(pos+1)
+      #elif input is 'k':
+      #  if self.get_focus_up():
+      #    focus, pos = self.northPanel.get_focus()
+      #  else:
+      #    self.southPanel.set_focus(pos-1)
+      elif input is 'h' or input is '?': # help
         self.content[:] = self.get_south_content('')
-
-      if input is 'tab':
+      elif input is 'tab':
         inv_focus()
 
