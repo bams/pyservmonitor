@@ -44,7 +44,7 @@ in the south panel
 class Entry(urwid.Text):
 
   def selectable(self):
-      return False
+      return True
 
   def keypress(self,  size,  key):
       return key
@@ -220,7 +220,7 @@ class ui():
         content = [urwid.AttrMap(Entry('<no output>'), None)]
         #content = [urwid.AttrMap(w, None) for w in self.empty_txt]
       else:
-        content = [urwid.AttrMap(Entry(w), None) for w in text]
+        content = [urwid.AttrMap(Entry(w), None, focus_map='south') for w in text]
     return content
 
   # update header
