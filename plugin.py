@@ -40,6 +40,15 @@ class MyTree:
         return ret
     return None
 
+  def _repr_node(self):
+    out = '%s%s (title: %s)\n' % (self.depth*'\t', self.name, self.is_title())
+    for c in self.children:
+      out += c._repr_node()
+    return out
+
+  def __repr__(self):
+    return self._repr_node()
+
   def is_title(self):
     return self._title
   
