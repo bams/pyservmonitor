@@ -8,7 +8,7 @@
 from plugin import *
 from cfg_reader import cfg_reader
 import argparse
-from ui import *
+from ui2 import *
 import os
 import sys
 
