@@ -104,10 +104,10 @@ class TextTreeWidget(urwid.TreeWidget):
 '''
 the text node wrapping the text widget
 '''
-class TextNode(urwid.TreeNode):
-
-  def load_widget(self):
-    return TextTreeWidget(self)
+#class TextNode(urwid.TreeNode):
+#
+#  def load_widget(self):
+#    return TextTreeWidget(self)
 
 '''
 a node with children
@@ -127,8 +127,9 @@ class EntryNode(urwid.ParentNode):
     ndepth = elem.depth + 1
     if elem.is_title():
       return EntryNode(nchild, parent=self, key=key, depth=ndepth)
-    else:
-      return TextNode(nchild, parent=self, key=key, depth=ndepth)
+    return None
+    #else:
+    #  return TextNode(nchild, parent=self, key=key, depth=ndepth)
 
 '''
 the ui class
