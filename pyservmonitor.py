@@ -24,9 +24,9 @@ args = parser.parse_args()
 cfg = args.config
 
 # check user is root
-if os.geteuid() != 0:
-  err('get r00t !')
-  sys.exit(0)
+#if os.geteuid() != 0:
+#  err('get r00t !')
+#  sys.exit(0)
 
 if not os.path.isfile(cfg) or not os.path.exists(cfg):
   err('config file \"%s\" does not exist !' % (cfg))
