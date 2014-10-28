@@ -16,25 +16,38 @@ class plugin():
     self.cmd = cmd
 
   def __repr__(self):
-    return 'plugin object (name: \"%s\", menu: \"%s\", cmd: \"%s\")' % (self.name, self.menu_txt, self.cmd)
+    return '(name: \"%s\", menu: \"%s\", cmd: \"%s\")' % \
+      (self.name, self.menu_txt, self.cmd)
 
+'''
+a tree that contains all commands/plugins
+'''
 class MyTree:
+
   def __init__(self, name='', data=None, depth=0):
     self.name = name
     self.data = data
     self.children = []
     self.depth = depth
-    self._title = False
-    if data == None:
-      self._title = True
+    self._title = (data == None)
 
   def rec_get_name(self, cname):
     if self.name == cname and self.is_title():
       return self
-    if len(self.children) < 1:
-      return None
     for c in self.children:
-      return c.rec_get_name(cname)
+      ret = c.rec_get_name(cname)
+      if ret != None:
+        return ret
+    return None
+
+  def _repr_node(self):
+    out = '%s%s (title: %s)\n' % (self.depth*'\t', self.name, self.is_title())
+    for c in self.children:
+      out += c._repr_node()
+    return out
+
+  def __repr__(self):
+    return self._repr_node()
 
   def is_title(self):
     return self._title
@@ -48,21 +61,4 @@ class MyTree:
     else:
       node = MyTree(name, data, depth=child.depth+1)
       child.children.append(node)
-
-  def _print_node(self, indent):
-    res = '\t'*indent
-    res += 'name: %s (title: %s)\n' % (self.name, self._title)
-    if not self.is_title():
-      res += '\t'*indent + 'data: '
-      res += str(self.data)
-    return res + '\n'
-
-  def print_tree(self, indent=0):
-    res = self._print_node(indent)
-    for c in self.children:
-      res += c.print_tree(indent+1)
-    return res
-  
-  def __repr__(self):
-    return self.print_tree()
 
