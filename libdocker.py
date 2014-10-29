@@ -1,5 +1,6 @@
 # author: deadc0de6
 # https://docs.docker.com/reference/api/docker_remote_api_v1.10/
+# https://docs.docker.com/reference/api/docker_remote_api_v1.15/
 #
 # TODO
 # find docker socket with python
@@ -13,6 +14,7 @@
 #print r.get_images_info()
 #print r.get_containers_info()
 #print r.get_conts_details()
+#print r.get_conts_log()
 #r.disconnect()
 
 import socket
@@ -50,6 +52,7 @@ class dockerapi():
   REQ_CONT_LIST_ALL = '/containers/json?all=1&size=1'
   REQ_CONT_INSPECT = '/containers/%s/json' # container-id
   REQ_CONT_LIST_PROCESS = '/containers/%s/top' # container-id
+  REQ_CONT_LOG = '/containers/%s/logs?stderr=1&stdout=1&timestamps=1&follow=0&tail=all' # container-id
 
   # image requests
   REQ_IMG_LIST_NOTALL = '/images/json?all=0'
@@ -73,10 +76,27 @@ class dockerapi():
   def get_cont_details(self, cont_id):
     return self._to_string(self.query(self.REQ_CONT_INSPECT % (cont_id)))
 
+  def strip_bash_char(self, string):
+    res = string.replace('[?1034h', '')
+    res = res.replace('[K', '\n')
+    res = res.replace('\x1b', '')
+    return res
+
+  def get_cont_log(self, cont_id):
+    dummy = self.query(self.REQ_CONT_LOG %
+      (cont_id), jsondata=False)
+    return self.strip_bash_char(dummy)
+
   def get_conts_details(self):
     ret = ''
     for i in self.get_cont_ids():
       ret += self.get_cont_details(i) + '\n'
+    return ret
+
+  def get_conts_log(self):
+    ret = ''
+    for i in self.get_cont_ids():
+      ret += self.get_cont_log(i) + '\n'
     return ret
 
   # as string
@@ -98,7 +118,7 @@ class dockerapi():
   def get_containers_info(self):
     return self._to_string(self.query(self.REQ_CONT_LIST_ALL))
 
-  def query(self, req):
+  def query(self, req, jsondata=True):
     try:
       self._debug('requesting: %s' % (req))
       self._http.request('GET', req)
@@ -108,7 +128,10 @@ class dockerapi():
         self._debug('error: %s' % (err))
         return err
       content = resp.read()
-      data = json.loads(content)
+      if jsondata:
+        data = json.loads(content)
+      else:
+        data = content
       return data
     except socket.error as err:
       if err.errno == 2:
