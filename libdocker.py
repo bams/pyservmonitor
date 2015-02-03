@@ -1,4 +1,23 @@
 # author: deadc0de6
+# contact: https://github.com/deadc0de6
+#
+# docker library
+#
+# Copyright (C) 2014 deadc0de6
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+#
 # https://docs.docker.com/reference/api/docker_remote_api_v1.10/
 # https://docs.docker.com/reference/api/docker_remote_api_v1.15/
 #
@@ -28,7 +47,7 @@ class dockhttp(HTTPConnection):
   def __init__(self, path):
     HTTPConnection.__init__(self, '127.0.0.1')
     self.path = path
-  
+
   # overwrite connect method with unix socket
   def connect(self):
     self.sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
